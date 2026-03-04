@@ -32,3 +32,12 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore AI/agent notes by filename pattern (keep real project docs like README).
+**/*agent*.md
+**/*ai*.md
+**/*codex*.md
+**/*claude*.md
+**/*chatgpt*.md
+!README.md
+!**/README.md
