@@ -32,3 +32,10 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore private markdown notes (keep real project docs like README).
+**/*private-notes*.md
+**/*scratch-notes*.md
+**/*local-notes*.md
+!README.md
+!**/README.md
