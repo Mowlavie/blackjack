@@ -1,0 +1,110 @@
+<div class="table">
+  <header class="topbar">
+    <h1 class="title">Blackjack</h1>
+    <div class="chips-display">
+      <span>Chips: $<%= @game.chips %></span>
+      <% if @game.bet > 0 %>
+        <span>Bet: $<%= @game.bet %></span>
+      <% end %>
+    </div>
+    <%= button_to "Reset chips", new_game_path, class: "btn btn-light" %>
+  </header>
+
+  <p class="message-banner <%= outcome_class(@game) %>">
+    <%= @game.message %>
+  </p>
+
+  <section class="hand-section">
+    <h2 class="hand-label">
+      Dealer
+      <% if @game.state == "over" || @game.state == "dealer_turn" %>
+        <span class="total">Total: <%= @game.dealer_hand&.total %></span>
+      <% end %>
+    </h2>
+    <div class="cards">
+      <% if @game.dealer_hand %>
+        <% @game.dealer_hand.cards.each_with_index do |card, i| %>
+          <% if i == 1 && @game.state == "playing" %>
+            <div class="card face-down">?</div>
+          <% else %>
+            <div class="card <%= card.red? ? 'red' : 'black' %>">
+              <span class="corner top-left"><%= card.rank %><br><%= card.suit %></span>
+              <span class="center-suit"><%= card.suit %></span>
+              <span class="corner bottom-right"><%= card.rank %><br><%= card.suit %></span>
+            </div>
+          <% end %>
+        <% end %>
+      <% else %>
+        <div class="empty-hand">No cards yet.</div>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="hand-section">
+    <h2 class="hand-label">
+      You
+      <% if @game.player_hand %>
+        <span class="total <%= @game.player_hand.bust? ? 'bust' : '' %>">
+          Total: <%= @game.player_hand.total %>
+          <%= "(bust)" if @game.player_hand.bust? %>
+          <%= "(blackjack)" if @game.player_hand.blackjack? && @game.state == "playing" %>
+        </span>
+      <% end %>
+    </h2>
+    <div class="cards">
+      <% if @game.player_hand %>
+        <% @game.player_hand.cards.each do |card| %>
+          <div class="card <%= card.red? ? 'red' : 'black' %>">
+            <span class="corner top-left"><%= card.rank %><br><%= card.suit %></span>
+            <span class="center-suit"><%= card.suit %></span>
+            <span class="corner bottom-right"><%= card.rank %><br><%= card.suit %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-hand">No cards yet.</div>
+      <% end %>
+    </div>
+  </section>
+
+  <div class="action-area">
+    <% if @game.state == "betting" %>
+      <div class="bet-form">
+        <p class="form-label">Place a bet</p>
+        <%= form_with url: bet_path do |f| %>
+          <div class="bet-buttons">
+            <% [5, 10, 25, 50].each do |amount| %>
+              <%= f.submit "$#{amount}", name: "amount", value: amount.to_s, class: "btn btn-chip" %>
+            <% end %>
+          </div>
+          <div class="custom-bet">
+            <%= f.number_field :amount, placeholder: "Custom bet", min: 1, max: @game.chips, class: "input" %>
+            <%= f.submit "Place bet", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    <% elsif @game.state == "playing" %>
+      <div class="play-buttons">
+        <%= button_to "Hit", hit_path, class: "btn btn-primary" %>
+        <%= button_to "Stand", stand_path, class: "btn btn-secondary" %>
+      </div>
+    <% elsif @game.state == "over" %>
+      <div class="round-over">
+        <% if @game.chips < 1 %>
+          <p class="broke-msg">You are out of chips. Resetting to $100 for the next round.</p>
+        <% end %>
+        <%= button_to "Next round", new_round_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <details class="rules">
+    <summary>Rules</summary>
+    <ul>
+      <li>Try to beat the dealer without going over 21.</li>
+      <li>Face cards are worth 10. Aces are 1 or 11.</li>
+      <li>Hit takes another card. Stand ends your turn.</li>
+      <li>Dealer hits until at least 17.</li>
+      <li>Blackjack (Ace + 10-value card) pays 1.5x.</li>
+    </ul>
+  </details>
+</div>
